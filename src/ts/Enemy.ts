@@ -1,10 +1,10 @@
 import {IDestroyOptions, Sprite} from "pixi.js";
-import {MathUtils} from "utils/MathUtils";
+import {IVec2, MathUtils} from "utils/MathUtils";
 
 export class Enemy
 {
 	private _sprite: Sprite;
-	private _velocity: {x: number, y: number} = {
+	private _velocity: IVec2 = {
 		x: 0,
 		y: 0
 	};
@@ -76,10 +76,5 @@ export class Enemy
 	{
 		clearTimeout(this._timeoutId);
 		this._sprite.destroy(options);
-	}
-
-	public static async create()
-	{
-		
 	}
 }

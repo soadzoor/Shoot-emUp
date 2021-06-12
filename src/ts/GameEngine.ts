@@ -1,6 +1,7 @@
 import {Application} from "@pixi/app";
 import {Enemy} from "Enemy";
 import {ExplosionManager} from "ExplosionManager";
+import {Main} from "Main";
 import {Graphics, Sprite, TilingSprite} from "pixi.js";
 import {TextureManager} from "TextureManager";
 import {BrowserWindow} from "utils/BrowserWindow";
@@ -8,6 +9,8 @@ import {MathUtils} from "utils/MathUtils";
 
 export class GameEngine
 {
+	private _main: Main;
+
 	private _containerDiv = document.getElementById("playGround");
 	private _textureManager: TextureManager = new TextureManager();
 	private _app: Application = new Application();
@@ -22,6 +25,8 @@ export class GameEngine
 		}
 	};
 
+	private _score: number = 0;
+	private _isPlayerDestroyed: boolean = false;
 	private _player: Sprite;
 	private _enemies: Enemy[] = [];
 
@@ -37,6 +42,11 @@ export class GameEngine
 	private _enemySpawnIntervalId: number;
 	private _tickId: number;
 
+	constructor(main: Main)
+	{
+		this._main = main;
+	}
+
 	public async init()
 	{
 		if (this._containerDiv)
@@ -48,14 +58,15 @@ export class GameEngine
 
 			this._player = await this._textureManager.loadSprite("assets/images/spaceship.svg");
 			this._player.anchor.set(0.5, 0.5);
+			this._player.position.y = this._canvas.height / 2;
 
 			this._app.stage.addChild(this._player);
 
-			window.addEventListener("mousemove", this.onMouseMove);
-			window.addEventListener("touchmove", this.onTouchMove);
-
 			this._explosionManager = new ExplosionManager(await this._textureManager.loadTexture("assets/images/particle.png"));
 			this._app.stage.addChild(this._explosionManager.container);
+
+			window.addEventListener("mousemove", this.onMouseMove);
+			window.addEventListener("touchmove", this.onTouchMove);
 
 			this._shootIntervalId = window.setInterval(() =>
 			{
@@ -198,14 +209,57 @@ export class GameEngine
 			{
 				this._explosionManager.startExplosion(enemy.position.x, enemy.position.y, this._currentTimeStamp);
 				enemy.destroy();
+				this._score++;
 			}
 			else
 			{
+				if (!this._isPlayerDestroyed)
+				{
+					// Neither the player, nor the enemy are rotated,
+					// so we can use a simple algorithm to detect collisions
+					// for axis aligned bounding boxes (AABB)
+					if (MathUtils.detectAABBCollision(this._player, enemy))
+					{
+						this.endGame();
+					}
+				}
+
 				activeEnemies.push(enemy);
 			}
 		}
 
 		this._enemies = activeEnemies;
+	}
+
+	private endGame()
+	{
+		this._explosionManager.startExplosion(this._player.position.x, this._player.position.y, this._currentTimeStamp);
+		this._player.destroy();
+		this._isPlayerDestroyed = true;
+
+		window.removeEventListener("mousemove", this.onMouseMove);
+		window.removeEventListener("touchmove", this.onTouchMove);
+		clearInterval(this._enemySpawnIntervalId);
+		clearInterval(this._shootIntervalId);
+
+		setTimeout(() =>
+		{
+			const gameOverText = document.createElement("h2");
+			gameOverText.classList.add("gameOver");
+			gameOverText.textContent = "Game Over!";
+			this._containerDiv?.appendChild(gameOverText);
+
+			cancelAnimationFrame(this._tickId);
+
+			setTimeout(() =>
+			{
+				gameOverText.remove();
+				this._canvas.remove();
+				this._enemies.length = 0;
+				this._projectiles.length = 0;
+				this._main.menu?.classList.remove("hidden");
+			}, 4000);
+		}, 2000);
 	}
 
 	private onTick = () =>
@@ -221,6 +275,5 @@ export class GameEngine
 		this._explosionManager.update(this._currentTimeStamp);
 
 		this._prevTimeStamp = this._currentTimeStamp;
-		//this._spaceShip.position.y = 200 + 50 * Math.sin(performance.now() / 1000);
 	};
 }

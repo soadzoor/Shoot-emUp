@@ -1,9 +1,10 @@
 import {ParticleContainer, Sprite, Texture} from "pixi.js";
+import {IVec2} from "utils/MathUtils";
 
 interface IParticleGroup
 {
 	initialData: {
-		position: {x: number, y: number};
+		position: IVec2;
 		timeStamp: number;
 	},
 	sprites: Sprite[];

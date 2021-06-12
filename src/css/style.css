@@ -91,11 +91,19 @@ button {
 	background-size: cover;
 }
 
-#splashScreen h2 {
+h2 {
 	color: #22EE22;
 	font-size: 75px;
 	position: relative;
 	text-shadow: 0 3px 5px rgba(0,0,0,.6);
+}
+
+h2.gameOver {
+	color: #EE2222;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 }
 
 #playGround {

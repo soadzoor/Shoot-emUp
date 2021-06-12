@@ -29,7 +29,7 @@ export class Main
 	private onPlayClick = async () =>
 	{
 		this._menu?.classList.add("hidden");
-		this._gameEngine = new GameEngine();
+		this._gameEngine = new GameEngine(this);
 		await this._gameEngine.init();
 	};
 
@@ -61,6 +61,11 @@ export class Main
 				reject("HTML element doesn't exist");
 			}
 		});
+	}
+
+	public get menu()
+	{
+		return this._menu;
 	}
 }
 
