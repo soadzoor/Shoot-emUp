@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "./src/ts/",
+    "skipLibCheck": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "module": "esnext",

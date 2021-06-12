@@ -1,5 +1,10 @@
+import {GameEngine} from "GameEngine";
+
 export class Main
 {
+	private _gameEngine: GameEngine;
+	private _menu = document.getElementById("menu");
+
 	constructor()
 	{
 		this.init();
@@ -7,8 +12,21 @@ export class Main
 
 	private async init()
 	{
-		await this.hideSplashScreen();		
+		await this.hideSplashScreen();
+
+		const gameButtonIds = ["game1", "game2", "game3"];
+		for (const gameButtonId of gameButtonIds)
+		{
+			document.getElementById(gameButtonId)?.addEventListener("click", this.onPlayClick);
+		}
 	}
+
+	private onPlayClick = async () =>
+	{
+		this._menu?.classList.add("hidden");
+		this._gameEngine = new GameEngine();
+		await this._gameEngine.init();
+	};
 
 	private hideSplashScreen()
 	{
