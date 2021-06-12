@@ -1,5 +1,5 @@
 import {Application} from "@pixi/app";
-import {Sprite} from "pixi.js";
+import {Graphics, Sprite} from "pixi.js";
 import {TextureManager} from "TextureManager";
 import {BrowserWindow} from "utils/BrowserWindow";
 import {MathUtils} from "utils/MathUtils";
@@ -9,7 +9,15 @@ export class GameEngine
 	private _containerDiv = document.getElementById("playGround");
 	private _textureManager: TextureManager = new TextureManager();
 	private _app: Application = new Application();
-	private _spaceShip: Sprite;
+	private _player: Sprite;
+	private _bullets: Graphics[] = [];
+	private _bulletSpeed: number = 0.8; // px / ms
+	private _prevTimeStamp: number = 0;
+	private _currentTimeStamp: number = 1;
+	private _delta: number = 1;
+	private _shootIntervalId: number;
+	private _enemyIntervalId: number;
+	private _tickId: number;
 
 	public async init()
 	{
@@ -18,17 +26,30 @@ export class GameEngine
 			const canvas = this._canvas;
 			this._containerDiv.appendChild(canvas);
 
-			this._spaceShip = await this._textureManager.loadSprite("assets/images/spaceship.png");
-			this._spaceShip.anchor.set(0.5, 0.5);
-			//this._spaceShip.position.x = 200;
-			//this._spaceShip.position.y = 200;
+			this._player = await this._textureManager.loadSprite("assets/images/spaceship.png");
+			this._player.anchor.set(0.5, 0.5);
 
-			this._app.stage.addChild(this._spaceShip);
+			this._app.stage.addChild(this._player);
 
 			window.addEventListener("mousemove", this.onMouseMove);
 			window.addEventListener("touchmove", this.onTouchMove);
 
-			this._app.ticker.add(this.onTick);
+			this._shootIntervalId = window.setInterval(() =>
+			{
+				const bullet = new Graphics();
+				bullet.beginFill(0x00FF00);
+				const width = 30;
+				const height = 5;
+				bullet.drawRect(0, 0, width, height);
+				bullet.pivot.set(width / 2, height / 2);
+				bullet.position.set(this._player.position.x, this._player.position.y);
+
+				this._bullets.push(bullet);
+				this._app.stage.addChild(bullet);
+			}, 500);
+
+
+			this._tickId = window.requestAnimationFrame(this.onTick);
 		}
 		else
 		{
@@ -59,11 +80,37 @@ export class GameEngine
 		let {localX, localY} = BrowserWindow.clientXYToLocalXY(clientX, clientY, this._canvas);
 		localX = MathUtils.clamp(localX, 0, this._canvas.width);
 		localY = MathUtils.clamp(localY, 0, this._canvas.height);
-		this._spaceShip.position.set(localX, localY);
+		this._player.position.set(localX, localY);
 	}
 
-	private onTick = (delta: number) =>
+	private updateBullets(delta: number)
 	{
+		const activeBullets: Graphics[] = [];
+		for (const bullet of this._bullets)
+		{
+			bullet.position.x += this._bulletSpeed * delta;
+			if (bullet.position.x - bullet.width / 2 < this._canvas.width)
+			{
+				activeBullets.push(bullet);
+			}
+			else
+			{
+				bullet.destroy();
+			}
+		}
+
+		this._bullets = activeBullets;
+	}
+
+	private onTick = () =>
+	{
+		this._currentTimeStamp = performance.now();
+		this._delta = this._currentTimeStamp - this._prevTimeStamp;
+		this._tickId = window.requestAnimationFrame(this.onTick);
+
+		this.updateBullets(this._delta);
+
+		this._prevTimeStamp = this._currentTimeStamp;
 		//this._spaceShip.position.y = 200 + 50 * Math.sin(performance.now() / 1000);
 	};
 }
