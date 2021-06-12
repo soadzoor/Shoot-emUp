@@ -11,6 +11,7 @@ export class GameEngine
 {
 	private _main: Main;
 
+	private _scoreDiv = document.createElement("div");
 	private _containerDiv = document.getElementById("playGround");
 	private _textureManager: TextureManager = new TextureManager();
 	private _app: Application = new Application();
@@ -53,6 +54,9 @@ export class GameEngine
 		{
 			const canvas = this._canvas;
 			this._containerDiv.appendChild(canvas);
+			this._scoreDiv.classList.add("score");
+			this.updateScoreDiv();
+			this._containerDiv.appendChild(this._scoreDiv);
 
 			await this.initBackground();
 
@@ -210,6 +214,7 @@ export class GameEngine
 				this._explosionManager.startExplosion(enemy.position.x, enemy.position.y, this._currentTimeStamp);
 				enemy.destroy();
 				this._score++;
+				this.updateScoreDiv();
 			}
 			else
 			{
@@ -231,6 +236,11 @@ export class GameEngine
 		this._enemies = activeEnemies;
 	}
 
+	private updateScoreDiv()
+	{
+		this._scoreDiv.textContent = `Enemy ships destroyed: ${this._score}`;
+	}
+
 	private endGame()
 	{
 		this._explosionManager.startExplosion(this._player.position.x, this._player.position.y, this._currentTimeStamp);
@@ -246,8 +256,9 @@ export class GameEngine
 		{
 			const gameOverText = document.createElement("h2");
 			gameOverText.classList.add("gameOver");
-			gameOverText.textContent = "Game Over!";
+			gameOverText.textContent = `Game Over! Your score: ${this._score}`;
 			this._containerDiv?.appendChild(gameOverText);
+			this._scoreDiv.remove();
 
 			cancelAnimationFrame(this._tickId);
 
@@ -258,8 +269,8 @@ export class GameEngine
 				this._enemies.length = 0;
 				this._projectiles.length = 0;
 				this._main.menu?.classList.remove("hidden");
-			}, 4000);
-		}, 2000);
+			}, 5000);
+		}, 1500);
 	}
 
 	private onTick = () =>

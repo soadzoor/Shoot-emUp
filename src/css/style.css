@@ -92,6 +92,7 @@ button {
 }
 
 h2 {
+	cursor: default;
 	color: #22EE22;
 	font-size: 75px;
 	position: relative;
@@ -99,11 +100,19 @@ h2 {
 }
 
 h2.gameOver {
+	font-size: 60px;
 	color: #EE2222;
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
+}
+
+.score {
+	margin-top: 10px;
+	font-size: 50px;
+	color: #22EE22;
+	text-shadow: 0 3px 5px rgba(0,0,0,.6);
 }
 
 #playGround {
