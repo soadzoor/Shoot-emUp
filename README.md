@@ -1,2 +1,4 @@
-# TypeScript template
-This is a minimal typescript project that you can use as a template for your projects that you're about to start
+# Shoot'em up
+A simple 2d space shooter with TypeScript and pixi.js
+
+Live version: https://soadzoor.github.io/ShootemUp
