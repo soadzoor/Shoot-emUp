@@ -1,4 +1,5 @@
 import {Application} from "@pixi/app";
+import {Enemy} from "Enemy";
 import {ExplosionManager} from "ExplosionManager";
 import {Graphics, Sprite, TilingSprite} from "pixi.js";
 import {TextureManager} from "TextureManager";
@@ -22,7 +23,7 @@ export class GameEngine
 	};
 
 	private _player: Sprite;
-	private _enemies: Sprite[] = [];
+	private _enemies: Enemy[] = [];
 
 	private _projectiles: Graphics[] = [];
 	private _projectileSpeed: number = 0.8; // px / ms
@@ -72,14 +73,13 @@ export class GameEngine
 
 			this._enemySpawnIntervalId = window.setInterval(async () =>
 			{
-				const enemy = await this._textureManager.loadSprite("assets/images/enemy.png");
-				enemy.anchor.set(0.5, 0.5);
+				const enemy = new Enemy(await this._textureManager.loadSprite("assets/images/enemy.png"));
 
 				enemy.position.x = this._canvas.width + enemy.width / 2;
 				enemy.position.y = Math.random() * this._canvas.height;
 
 				this._enemies.push(enemy);
-				this._app.stage.addChild(enemy);
+				this._app.stage.addChild(enemy.sprite);
 			}, 2000);
 
 			this._tickId = window.requestAnimationFrame(this.onTick);
@@ -166,7 +166,7 @@ export class GameEngine
 		this._projectiles = activeProjectiles;
 	}
 
-	private isEnemyCollidingWithProjectiles(enemy: Sprite)
+	private isEnemyCollidingWithProjectiles(enemy: Enemy)
 	{
 		for (const projectiles of this._projectiles)
 		{
@@ -188,11 +188,11 @@ export class GameEngine
 
 	private updateEnemies(delta: number)
 	{
-		const activeEnemies: Sprite[] = [];
+		const activeEnemies: Enemy[] = [];
 
 		for (const enemy of this._enemies)
 		{
-			enemy.position.x -= 0.03 * delta;
+			enemy.updatePosition(delta, this._canvas.width, this._canvas.height);
 
 			if (this.isEnemyCollidingWithProjectiles(enemy))
 			{
