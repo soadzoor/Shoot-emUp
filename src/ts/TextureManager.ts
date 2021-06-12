@@ -6,24 +6,27 @@ export class TextureManager
 
 	public loadSprite(path: string, tiling: boolean = false)
 	{
-		return new Promise<Sprite | TilingSprite>((resolve, reject) =>
+		return new Promise<Sprite | TilingSprite>(async (resolve, reject) =>
 		{
-			const resolveSprite = () =>
-			{
-				const texture = this._loader.resources[path].texture as Texture;
-				const sprite = tiling ? new TilingSprite(texture, texture.width, texture.height) : new Sprite(texture);
-				resolve(sprite);
-			};
+			const texture = await this.loadTexture(path);
+			const sprite = tiling ? new TilingSprite(texture, texture.width, texture.height) : new Sprite(texture);
+			resolve(sprite);
+		});
+	}
 
+	public loadTexture(path: string)
+	{
+		return new Promise<Texture>((resolve, reject) =>
+		{
 			if (this._loader.resources[path]?.texture)
 			{
-				resolveSprite();
+				resolve(this._loader.resources[path].texture as Texture);
 			}
 			else
 			{
 				this._loader.add(path).load(() =>
 				{
-					resolveSprite();
+					resolve(this._loader.resources[path].texture as Texture);
 				});
 			}
 		});
