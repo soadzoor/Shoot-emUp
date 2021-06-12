@@ -59,7 +59,7 @@ export class GameEngine
 			this._app.stage.addChild(this._background.far.sprite);
 			this._app.stage.addChild(this._background.mid.sprite);
 
-			this._player = await this._textureManager.loadSprite("assets/images/spaceship.png");
+			this._player = await this._textureManager.loadSprite("assets/images/spaceship.svg");
 			this._player.anchor.set(0.5, 0.5);
 
 			this._app.stage.addChild(this._player);
