@@ -19,7 +19,7 @@ export class Main
 			if (splashScreen)
 			{
 				const fadeDuration = 1000; // ms
-				splashScreen.style.transition = `opacity ${fadeDuration / 1000}s ease-out`;
+				splashScreen.style.transition = `opacity ${fadeDuration}ms ease-out`;
 				setTimeout(() =>
 				{
 					if (splashScreen)
