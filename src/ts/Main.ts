@@ -19,6 +19,11 @@ export class Main
 		{
 			document.getElementById(gameButtonId)?.addEventListener("click", this.onPlayClick);
 		}
+
+		document.getElementById("exit")?.addEventListener("click", () =>
+		{
+			window.location.href = "https://github.com/soadzoor";
+		});
 	}
 
 	private onPlayClick = async () =>
