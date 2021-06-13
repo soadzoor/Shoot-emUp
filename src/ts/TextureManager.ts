@@ -1,4 +1,4 @@
-import {Loader, Sprite, Texture, TilingSprite} from "pixi.js";
+import {Loader, Sprite, Texture, TilingSprite, utils} from "pixi.js";
 
 export class TextureManager
 {
@@ -30,5 +30,11 @@ export class TextureManager
 				});
 			}
 		});
+	}
+
+	public destroy()
+	{
+		utils.clearTextureCache();
+		this._loader.destroy();
 	}
 }

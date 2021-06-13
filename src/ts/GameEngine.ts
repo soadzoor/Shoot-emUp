@@ -6,6 +6,7 @@ import {Graphics, Sprite, TilingSprite} from "pixi.js";
 import {TextureManager} from "TextureManager";
 import {BrowserWindow} from "utils/BrowserWindow";
 import {MathUtils} from "utils/MathUtils";
+import {TimeUtils} from "utils/TimeUtils";
 
 export class GameEngine
 {
@@ -241,7 +242,7 @@ export class GameEngine
 		this._scoreDiv.textContent = `Enemy ships destroyed: ${this._score}`;
 	}
 
-	private endGame()
+	private async endGame()
 	{
 		this._explosionManager.startExplosion(this._player.position.x, this._player.position.y, this._currentTimeStamp);
 		this._player.destroy();
@@ -252,25 +253,25 @@ export class GameEngine
 		clearInterval(this._enemySpawnIntervalId);
 		clearInterval(this._shootIntervalId);
 
-		setTimeout(() =>
-		{
-			const gameOverText = document.createElement("h2");
-			gameOverText.classList.add("gameOver");
-			gameOverText.textContent = `Game Over! Your score: ${this._score}`;
-			this._containerDiv?.appendChild(gameOverText);
-			this._scoreDiv.remove();
+		await TimeUtils.sleep(1500);
 
-			cancelAnimationFrame(this._tickId);
+		const gameOverText = document.createElement("h2");
+		gameOverText.classList.add("gameOver");
+		gameOverText.textContent = `Game Over! Your score: ${this._score}`;
+		this._containerDiv?.appendChild(gameOverText);
+		this._scoreDiv.remove();
 
-			setTimeout(() =>
-			{
-				gameOverText.remove();
-				this._canvas.remove();
-				this._enemies.length = 0;
-				this._projectiles.length = 0;
-				this._main.menu?.classList.remove("hidden");
-			}, 5000);
-		}, 1500);
+		cancelAnimationFrame(this._tickId);
+
+		await TimeUtils.sleep(5000);
+
+		gameOverText.remove();
+		this._app.ticker.stop();
+		this._app.destroy(true, {texture: true, children: true, baseTexture: true});
+		this._textureManager.destroy();
+		this._enemies.length = 0;
+		this._projectiles.length = 0;
+		this._main.menu?.classList.remove("hidden");
 	}
 
 	private onTick = () =>
